@@ -1,3 +1,5 @@
+#%%
+import re
 import os
 import pandas as pd
 import numpy as np
@@ -8,7 +10,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 
-import re
 
 
 df_train = pd.read_csv(os.path.join('data','train.csv'))
@@ -68,13 +69,14 @@ def process(df):
     
     return df
 
+## Processing the features
 df_train = process(df_train)
 df_test = process(df_test)
 
 y_train = df_train["Survived"]
 x_train = df_train.drop("Survived",axis=1)
-x_train = pd.get_dummies(x_train, dtype=int)
 
+x_train = pd.get_dummies(x_train, dtype=int)
 x_test = pd.get_dummies(df_test, dtype=int)
 
 ## Fitting the same columns to one another
@@ -92,9 +94,14 @@ x_train_fit.insert(int(index),col_to_add[0],0)
 ## Need to scale the data
 
 scaler = StandardScaler()
+#%%
+col_to_scale = ['Age','Fare','Cabin']
 
-scaled_train = pd.DataFrame(scaler.fit_transform(x_train_fit), columns=x_train_fit.columns)
-scaled_test = pd.DataFrame(scaler.fit_transform(x_test), columns=x_test.columns)
+scaled_train = x_train_fit
+scaled_train[col_to_scale] = scaler.fit_transform(x_train_fit[col_to_scale])
+
+scaled_test = x_test
+scaled_test[col_to_scale] = scaler.fit_transform(x_test[col_to_scale])
 
 ## Getting result
     ## Logistic Regression
@@ -113,3 +120,5 @@ submission_df.to_csv(os.path.join('results','result.csv'))
 
 submission_df["Survived"] = rf_result
 submission_df.to_csv(os.path.join('results','result_rf.csv'))
+
+# %%
